@@ -1,0 +1,62 @@
+name: Build and Deploy dev
+
+env:
+  NODE_VERSION: '18'
+  GCP_PROJECT_ID: 'rbl-common'
+  SERVER_USER: 'w3reg'
+  SERVER_IP: '135.181.202.179'
+  DEPLOY_PATH: '/home/w3reg/dev.w3reg.org'
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    continue-on-error: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # - name: Set up Node.js
+      #   uses: actions/setup-node@v2
+      #   with:
+      #     node-version: ${{ env.NODE_VERSION }}
+
+      # - name: Install dependencies
+      #   run: yarn install
+      #
+      # - name: Build for w3registrar-www
+      #   env:
+      #     VITE_PROJECT: w3registrar-www
+      #     # VITE_APP_WALLET_CONNECT_PROJECT_ID: ${{ secrets.VITE_APP_WALLET_CONNECT_PROJECT_ID }}
+      #     # VITE_APP_DEFAULT_WS_URL: ${{ secrets.VITE_APP_DEFAULT_WS_URL }}
+      #   run: |
+      #     cp .env.example .env
+      #     # echo "VITE_APP_WALLET_CONNECT_PROJECT_ID=$VITE_APP_WALLET_CONNECT_PROJECT_ID" >> .env
+      #     # echo "VITE_APP_DEFAULT_WS_URL=$VITE_APP_DEFAULT_WS_URL" >> .env
+      #     yarn buildpub:w3registrar-www
+      #     mv dist dist-w3registrar-www
+
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add SSH Key to Known Hosts
+        run: |
+          echo "$(ssh-keyscan -t rsa ${{ env.SERVER_IP }} 2>/dev/null)" >> ~/.ssh/known_hosts
+
+      - name: Deploy to server
+        run: |
+          ssh ${{ env.SERVER_USER }}@${{ env.SERVER_IP }} "mkdir -p ${{ env.DEPLOY_PATH }}/w3registrar-www"
+          scp -r ./* ${{ env.SERVER_USER }}@${{ env.SERVER_IP }}:${{ env.DEPLOY_PATH }}/w3registrar-www
+          scp -r ./.env.example ${{ env.SERVER_USER }}@${{ env.SERVER_IP }}:${{ env.DEPLOY_PATH }}/w3registrar-www/.env
+          scp -r ./.papi ${{ env.SERVER_USER }}@${{ env.SERVER_IP }}:${{ env.DEPLOY_PATH }}/w3registrar-www/.papi
+          ssh ${{ env.SERVER_USER }}@${{ env.SERVER_IP }} "cd ${{ env.DEPLOY_PATH }}/w3registrar-www && docker compose -f docker-compose.yaml up -d"

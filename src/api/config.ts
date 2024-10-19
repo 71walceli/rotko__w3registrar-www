@@ -90,3 +90,17 @@ export const config = {
 registerDotConnect({
   wallets: config.wallets,
 });
+
+export function createConfigWithCustomEndpoint(chainId: ChainId, endpoint: string): Config {
+  const newConfig = createConfig();
+  return {
+    ...newConfig,
+    chains: {
+      ...newConfig.chains,
+      [chainId]: {
+        ...newConfig.chains[chainId],
+        provider: getWsProvider(endpoint),
+      },
+    },
+  };
+}
