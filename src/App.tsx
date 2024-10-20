@@ -3,13 +3,13 @@ import React, { Suspense, createContext, useEffect } from 'react';
 import type { RouteType } from '~/routes';
 import { routes } from '~/routes';
 
-import { config } from "./api/config";
 import { proxy, useSnapshot } from 'valtio';
 
 import { useRpcWebSocketProvider } from './api/WebSocketClient';
 
 import { ConnectionDialog } from "dot-connect/react.js";
 import { IdentityFormFields } from './components/IdentityForm';
+import { configStore } from './api/config2';
 
 
 interface Props {
@@ -58,7 +58,6 @@ export const appState: {
     verified: boolean,
   }>
 } = proxy({
-  chain: Object.keys(config.chains)[0],
   walletDialogOpen: false,
   stage: 0,
   challenges: {
@@ -118,19 +117,21 @@ export default function App() {
   }, [appStateSnapshot.account?.address, api])
 
   return <>
-    <Router>
-      <Routes>
-        {routes.map((route) => (
-          <Route
-            path={route.path}
-            key={route.path}
-            element={<DomTitle route={route} />}
-          />
-        ))}
-      </Routes>
-    </Router>
-    <ConnectionDialog open={appStateSnapshot.walletDialogOpen} 
-      onClose={() => { appState.walletDialogOpen = false }} 
-    />
+    {appStateSnapshot.chain && <>
+      <Router>
+        <Routes>
+          {routes.map((route) => (
+            <Route
+              path={route.path}
+              key={route.path}
+              element={<DomTitle route={route} />}
+            />
+          ))}
+        </Routes>
+      </Router>
+      <ConnectionDialog open={appStateSnapshot.walletDialogOpen} 
+        onClose={() => { appState.walletDialogOpen = false }} 
+      />
+    </>}
   </>;
 }

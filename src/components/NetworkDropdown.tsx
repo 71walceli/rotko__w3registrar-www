@@ -1,28 +1,27 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSnapshot } from 'valtio';
-import { config } from '~/api/config';
 import { useRpcWebSocketProvider } from '~/api/WebSocketClient';
 import { appState } from '~/App';
+import { configStore } from '~/api/config2';
 
 const NetworkDropdown: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [customSelected, setCustomSelected] = useState(false);
   const [_wsUrl, _setWsUrl] = useState("");
   const [urlValidation, setUrlValidation] = useState<{ isValid: boolean; message: string }>({ isValid: true, message: "" });
-  const { wsUrl, setWsUrl } = useRpcWebSocketProvider();
   const appStateSnapshot = useSnapshot(appState);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (wsUrl) {
+  /* useEffect(() => {
+    if (appStateSnapshot) {
       setCustomSelected(true);
       _setWsUrl(wsUrl);
     } else {
       setCustomSelected(false);
       _setWsUrl("");
     }
-  }, [wsUrl]);
+  }, [wsUrl]); */
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -58,6 +57,8 @@ const NetworkDropdown: React.FC = () => {
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
+  const configStoreSnap = useSnapshot(configStore.config)
+
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newUrl = e.target.value;
     _setWsUrl(newUrl);
@@ -67,7 +68,6 @@ const NetworkDropdown: React.FC = () => {
   const handleUrlSubmit = () => {
     const validation = validateUrl(_wsUrl);
     if (validation.isValid) {
-      setWsUrl(_wsUrl);
       setIsOpen(false);
     } else {
       setUrlValidation(validation);
@@ -87,12 +87,12 @@ const NetworkDropdown: React.FC = () => {
         onClick={() => setIsOpen(!isOpen)}
         className="bg-stone-200 text-stone-800 px-3 py-2 text-sm font-medium border border-stone-400 w-full text-left flex justify-between items-center"
       >
-        <span>{customSelected ? "Custom" : config.chains[appStateSnapshot.chain].name}</span>
+        <span>{customSelected ? "Custom" : configStoreSnap.config.chains[appStateSnapshot.chain].name}</span>
         <span className="ml-2">▼</span>
       </button>
       {isOpen && (
         <div className="absolute right-0 mt-1 w-64 bg-white border border-stone-300 shadow-lg z-10 rounded overflow-hidden">
-          {Object.entries(config.chains)
+          {Object.entries(configStoreSnap.config.chains)
             .filter(([key]) => key.includes("people"))
             .map(([key, net]) => (
               <button
