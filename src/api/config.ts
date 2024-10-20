@@ -11,8 +11,6 @@ import { getSmProvider } from "polkadot-api/sm-provider";
 import { startFromWorker } from "polkadot-api/smoldot/from-worker";
 import { LedgerWallet } from "@reactive-dot/wallet-ledger";
 import { WalletConnect } from "@reactive-dot/wallet-walletconnect";
-import { registerDotConnect } from "dot-connect";
-import { getWsProvider } from "@polkadot-api/ws-provider/web";
 
 
 const initWorker = () => startFromWorker(
@@ -22,7 +20,7 @@ const initWorker = () => startFromWorker(
 )
 export let smoldot = initWorker();
 
-type ApiConfig = Config & {
+export type ApiConfig = Config & {
   chains: Record<string, ChainConfig & { name: string }>
 }
 export const config = {
@@ -85,22 +83,3 @@ export const config = {
     }),
   ],
 } as const satisfies ApiConfig;
-
-// Register dot-connect custom elements & configure supported wallets
-registerDotConnect({
-  wallets: config.wallets,
-});
-
-export function createConfigWithCustomEndpoint(chainId: ChainId, endpoint: string): Config {
-  const newConfig = createConfig();
-  return {
-    ...newConfig,
-    chains: {
-      ...newConfig.chains,
-      [chainId]: {
-        ...newConfig.chains[chainId],
-        provider: getWsProvider(endpoint),
-      },
-    },
-  };
-}
