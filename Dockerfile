@@ -15,7 +15,8 @@ RUN bunx papi add -n rococo_v2_2_people people_rococo
 
 FROM dependencies AS builder
 COPY . .
-RUN bun run build
+RUN bunx tsc-silent -p './tsconfig.json' --suppress @
+RUN bunx vite build -v
 
 FROM base AS production
 COPY --from=builder /app/dist /app/dist
