@@ -15,6 +15,7 @@ FROM dependencies AS builder
 COPY . .
 RUN bunx tsc-silent -p './tsconfig.json' --suppress @
 RUN bunx vite build -v
+RUN rm .env
 
 FROM base AS production
 COPY --from=builder /app/dist /app/dist
