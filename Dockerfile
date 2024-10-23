@@ -3,15 +3,13 @@ WORKDIR /app
 
 FROM base AS dependencies
 COPY package.json bun.lockb ./
+COPY .papi .papi
 
 # Install dependencies
 RUN bun install --verbose
 
 # Use bunx to run 'papi' commands without full paths
-RUN bunx papi add -n polkadot_people people_polkadot
-RUN bunx papi add -n ksmcc3_people people_kusama
-RUN bunx papi add -n westend2_people people_westend
-RUN bunx papi add -n rococo_v2_2_people people_rococo
+RUN bunx papi update
 
 FROM dependencies AS builder
 COPY . .

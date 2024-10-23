@@ -33,7 +33,6 @@ dist-ssr
 .git
 
 # Misc
-.papi
 .pnpm-store
 .env
 docs
