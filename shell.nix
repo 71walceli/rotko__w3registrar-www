@@ -12,24 +12,16 @@ pkgs.mkShell {
       curl -fsSL https://bun.sh/install | bash -s "bun-v1.1.42"
     fi
 
-    if [ ! -d node_modules ]; then
-      bun install || true
-    fi
-
-    # Wait for the descriptors to be downloaded. This is a workaround because it's likely to fail
-    # by not generating the descriptors on the first try.
-    attempts=10
-    while [ ! -d .papi/descriptors/dist ]; do
-      bunx polkadot-api@1.8.0 update || true
-      attempts=$((attempts - 1))
-      if [ $attempts -eq 0 ]; then
-        echo "Failed to download descriptors"
-        exit 1
+    if [ -t 0 ]; then
+      echo "Interactive shell detected."
+      read -p "Run setup script? [Y/n] " response
+      response=${response:-Y}
+      if [[ $response =~ ^[Yy]$ ]]; then
+        echo "Running scripts/setup.sh..."
+        bash scripts/setup.sh
       fi
-    done
-
-    if [ ! -f .env ]; then
-      cp .env.example .env
+    else
+      echo "To set up project dependencies and environment, run scripts/setup.sh"
     fi
     set +euo pipefail
   '';
