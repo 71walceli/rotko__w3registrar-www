@@ -1,19 +1,24 @@
 #!/bin/bash
 set -euo pipefail
 
-if command -v bunx &> /dev/null; then
-    bunx papi add people_polkadot --wsUrl wss://people-polkadot.dotters.network
-    bunx papi add people_westend --wsUrl wss://people-westend.dotters.network
-    bunx papi add people_kusama --wsUrl wss://people-kusama.dotters.network
-    bunx papi add polkadot --wsUrl wss://polkadot.dotters.network
-    bunx papi add westend --wsUrl wss://westend.dotters.network
-    bunx papi add kusama --wsUrl wss://kusama.dotters.network
-    bunx papi
-elif command -v npx &> /dev/null; then
-    npx papi
-else
-    echo "Error: Neither bunx nor npx is available. Please install Bun or Node.js."
-    exit 1
+if [ ! -d node_modules ]; then
+    bun install || true
+fi
+
+# Wait for the descriptors to be downloaded. This is a workaround because it's likely to fail
+# by not generating the descriptors on the first try.
+attempts=10
+while [ ! -d .papi/descriptors/dist ]; do
+    bunx polkadot-api@1.8.0 update || true
+    attempts=$((attempts - 1))
+    if [ $attempts -eq 0 ]; then
+        echo "Failed to download descriptors"
+        exit 1
+    fi
+done
+
+if [ ! -f .env ]; then
+    cp .env.example .env
 fi
 
 echo "Papi setup completed successfully."
