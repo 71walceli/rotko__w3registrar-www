@@ -25,19 +25,7 @@ jobs:
         env:
           BUILD_TARGET: 'production'
         run: |
-          curl -fsSL https://bun.sh/install | bash -s "canary"
-          export BUN_INSTALL="$HOME/.bun"
-          export PATH=$BUN_INSTALL/bin:$PATH
-          nix-shell --command "bun run scripts/safeParseEnv.js"
-          # our overrides will be appended last, so even duplicate, they'll take precedence
-          echo "VITE_APP_WALLET_CONNECT_PROJECT_ID=${{ env.VITE_APP_WALLET_CONNECT_PROJECT_ID }}" >> .env
-          echo "VITE_APP_DEFAULT_WS_URL=${{ env.VITE_APP_DEFAULT_WS_URL }}" >> .env
-          echo "VITE_APP_DEFAULT_WS_URL_RELAY=${{ env.VITE_APP_DEFAULT_WS_URL_RELAY }}" >> .env
-          echo "VITE_APP_REGISTRAR_INDEX__PEOPLE_PASEO=${{ env.VITE_APP_REGISTRAR_INDEX__PEOPLE_PASEO }}" >> .env
-          echo "VITE_APP_AVAILABLE_CHAINS=${{ env.VITE_APP_AVAILABLE_CHAINS }}" >> .env
-          echo "VITE_APP_DEFAULT_CHAIN=${{ env.VITE_APP_DEFAULT_CHAIN }}" >> .env
-          echo "VITE_APP_CHALLENGES_API_URL=${{ vars.WS_API_URL }}" >> .env
-          cat .env | wc -l
+          nix-shell --command "bash scripts/setup.sh"
           nix-shell --command "bash scripts/build.sh"
       
       - name: Set up SSH agent
