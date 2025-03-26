@@ -19,14 +19,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: ./.github/actions/steps/setup-build-env.yaml
 
-      - name: Install Nix
-        uses: cachix/install-nix-action@v30 
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable
-      
-      - name: Build the Vite app
+      - name: Build the application
         env:
           BUILD_TARGET: 'production'
         run: |
