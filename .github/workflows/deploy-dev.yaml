@@ -58,7 +58,9 @@ jobs:
       - name: Build the application
         env:
           BUILD_TARGET: 'production'
-        run: nix-shell --command "bash scripts/build.sh"
+        run: |
+          nix-shell --command "bash scripts/setup.sh"
+          nix-shell --command "bash scripts/build.sh"
 
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.5.3
