@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: ./.github/actions/steps/setup-build-env
+      - uses: ./.github/actions/setup-build-env
 
       - name: Build the application
         env:
