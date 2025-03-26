@@ -26,6 +26,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+
       - uses: ./.github/actions/steps/setup-build-env.yaml
 
       - name: Build the application
